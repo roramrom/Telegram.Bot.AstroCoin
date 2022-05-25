@@ -1,0 +1,18 @@
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+
+
+# Fetching "kin" from lawoftime.org using selenium module
+def browser_kin(date_kin):
+    driver_service = Service('C:\webdrivers\chromedriver.exe')
+    driver = webdriver.Chrome(service=driver_service)
+    driver.get('https://lawoftime.org/decode/')
+    # date_xpath = ('//*[@id="dateInput"]')
+    button_xpath = ('//*[@id="buttonSubmit"]')
+    kin_xpath = ('/html/body/div[1]/div[2]/div[1]/div/section/div/div[2]/div/div/div[2]/div[1]/h4[3]')
+    date_kin = date_kin[5:7]+'/'+date_kin[8:10]+'/'+date_kin[0:4]
+    # driver.find_element(by='xpath', value=date_xpath).send_keys(date_kin)
+    driver.find_element(by='id', value='dateInput').send_keys(date_kin)
+    driver.find_element(by='xpath', value=button_xpath).click()
+    kin_text = driver.find_element(by='xpath', value=kin_xpath).text
+    return kin_text
