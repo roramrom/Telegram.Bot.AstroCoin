@@ -1,0 +1,60 @@
+import yfinance as yf
+import pandas as pd
+from datetime import datetime, timedelta
+
+price_btc_float = 0
+price_btc_float_sub1 = 0
+percent_up_down = ''
+
+
+# Function for fetching price of the coin by date from yahoo finance
+def date_price_btc(date_coin):
+    btc_from_yf = yf.download(tickers="BTC-USD", start=date_coin, end=date_coin, group_by='str')
+    price_btc = btc_from_yf["Close"].to_list()
+    price_btc_str = str(price_btc).strip('[').strip(']')
+    global price_btc_float
+    price_btc_float = float(price_btc_str)
+    return price_btc_float
+
+
+# Function for fetching price of the coin minus one day from yahoo finance
+def date_sub1_price_btc(date_coin):
+    date_to_date_time = datetime.strptime(date_coin, '%Y-%m-%d')
+    date_sub1 = datetime.date(date_to_date_time) - timedelta(days=1)
+    date_sub1_str = date_sub1.strftime('%Y-%m-%d')
+    btc_from_yf_sub1 = yf.download(tickers="BTC-USD", start=date_sub1_str, end=date_sub1_str, group_by='str')
+    price_btc_sub1 = btc_from_yf_sub1["Close"].to_list()
+    price_btc_str_sub1 = str(price_btc_sub1).strip('[').strip(']')
+    global price_btc_float_sub1
+    price_btc_float_sub1 = float(price_btc_str_sub1)
+    return price_btc_float_sub1
+
+
+# Function calculating percent of 24 hours change.
+# From "def date_sub1_price_btc(date_coin):" to "def date_price_btc(date_coin):"
+def date_price_arrow_percent_str(date_coin):
+    date_price_btc(date_coin)
+    date_sub1_price_btc(date_coin)
+    global percent_up_down
+    percent_up_down = (price_btc_float-price_btc_float_sub1)/(price_btc_float_sub1/100)
+    if str(percent_up_down)[-1] == '0':
+        if percent_up_down <= 0:
+            percent_up_down = ("⬇️ "+str((int(percent_up_down)))+'%')
+        else:
+            percent_up_down = ("⬇️ "+str((int(percent_up_down)))+'%')
+    else:
+        if percent_up_down <= 0:
+            percent_up_down = ("⬇️ "+str(round(percent_up_down, 2))+'%')
+        else:
+            percent_up_down = ("⬆️ "+str(round(percent_up_down, 2))+'%')
+    return percent_up_down
+
+
+# Function for fetching price of the coin by date from yahoo finance
+# Returns str + "$" at the end for telegram bot
+def price_btc_to_bot_str(date_coin):
+    btc_from_yf = yf.download(tickers="BTC-USD", start=date_coin, end=date_coin, group_by='str')
+    price_btc = btc_from_yf["Close"].to_list()
+    price_btc_str = str(price_btc).strip('[').strip(']')
+    price_btc_float_bot = float(price_btc_str)
+    return str(round(price_btc_float_bot, 2))+' $'
