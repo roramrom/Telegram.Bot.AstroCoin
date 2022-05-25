@@ -1,0 +1,32 @@
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+
+
+# Fetching "Seal" from lichspur.org using selenium module
+def browser_seal(date_calendar):
+    driver_service = Service('C:\webdrivers\chromedriver.exe')
+    driver = webdriver.Chrome(service=driver_service)
+    driver.get('https://www.lichtspur.org/index.php/en/')
+    driver.find_element(by='name', value='mycalendar').clear()
+    driver.find_element(by='name', value='mycalendar').send_keys(date_calendar)
+    driver.find_element(by='name', value="Submit").click()
+    current_url = driver.current_url
+    seal_xpath = ('/html/body/div/div/div[2]/main/div[2]/div[1]/div/form/table[2]/tbody/tr[3]/td')
+    seal_text = driver.find_element(by='xpath', value=seal_xpath).text
+    return seal_text
+
+
+# Fetching "Tone" from lichspur.org using selenium module
+def browser_tone(date_calendar):
+    driverService = Service('C:\webdrivers\chromedriver.exe')
+    driver = webdriver.Chrome(service=driverService)
+    driver.get('https://www.lichtspur.org/index.php/en/')
+    driver.find_element(by='id', value='date').clear()
+    driver.find_element(by='id', value='date').send_keys(date_calendar)
+    # driver.find_element(by='name', value='mycalendar').clear()
+    # driver.find_element(by='name', value='mycalendar').send_keys(date_calendar)
+    driver.find_element(by='name', value="Submit").click()
+    current_url = driver.current_url
+    tone_xpath = '/html/body/div/div/div[2]/main/div[2]/div[1]/div/form/table[2]/tbody/tr[4]/td/h1[2]'
+    tone_text = driver.find_element(by='xpath', value=tone_xpath).text
+    return tone_text
