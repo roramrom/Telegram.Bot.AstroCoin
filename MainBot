@@ -1,0 +1,89 @@
+import logging
+import states.machine
+from aiogram import Bot, Dispatcher, executor, types
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+import asyncio
+from asyncio import sleep
+import logging
+from aiogram.dispatcher.filters import Command, Text
+from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.dispatcher import FSMContext
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, InputFile
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
+import keyboard as kb
+# Need to import modules (functions from other files)
+from CoinData import date_price_arrow_percent_str
+from coindatayfinance import price_BTC_to_bot_str
+# Import some more modules (my functions)
+from ChromeAstro import browser_seal
+from SealToneData import browser_tone
+# Import another module (my function)
+from KinData import browser_kin
+
+
+bot = Bot(token='')
+logging.basicConfig(level=logging.INFO)
+dp = Dispatcher(bot, storage=MemoryStorage())
+
+
+# first let's make a menu
+start_menu = ReplyKeyboardMarkup(keyboard=[
+    [KeyboardButton(text='Start')]
+]
+    , resize_keyboard=True)
+
+
+# Let's make a class and create 2 states
+class Questions(StatesGroup):
+    q1 = State()
+    q2 = State()
+
+
+# 1st state
+@dp.message_handler(commands=['start'])
+async def la(message: types.Message, state: FSMContext):
+    await message.answer('Write the date. Example: ')
+    await message.answer('2020-11-23')
+
+    # save_date_from_user_text = message.text
+    await Questions.q1.set()
+
+# 2nd state
+@dp.message_handler(state=Questions.q1)
+async def la(message: types.Message, state: FSMContext):
+    # This is to sort out the dates before and after "2020-10-14"
+    if message.text[4] == '-' and message.text[7] == '-' and len(message.text) == 10:
+        if int(message.text[0:4]) >= 2020 and int(message.text[0:4]) <= 2022:
+            await message.answer('Coin: BTC')
+            await message.answer('Date: ' + message.text)
+            if price_BTC_to_bot_str(message.text):
+                await message.answer('Price: ' + price_BTC_to_bot_str(message.text))
+            else:
+                await message.answer('Not correct. Available from: ')
+                await message.answer('2020-10-14')
+            if date_price_arrow_percent_str(message.text):
+                await message.answer('Change: ' + date_price_arrow_percent_str(message.text))
+            else:
+                await message.answer('Not correct. Available from: ')
+                await message.answer('2020-10-14')
+            await message.answer('Seal: '+browser_seal(message.text))
+            await message.answer('Tone: '+browser_tone(message.text))
+            await message.answer(browser_kin(message.text), reply_markup=start_menu)
+            await state.reset_state()
+        else:
+            await message.answer('Not correct. Available from: ')
+            await message.answer('2020-10-14')
+    else:
+        await message.answer('Not correct. Example:')
+        await message.answer('2020-11-23', reply_markup=start_menu)
+
+
+# Let's make a reply for all other messages that users may send
+@dp.message_handler()
+async def la(message: types.Message, state: FSMContext):
+    await message.answer("Write the date. \nExample: 2021-09-21")
+    await Questions.q1.set()
+
+# Initiate the script
+if __name__ == '__main__':
+    executor.start_polling(dp, skip_updates=True)
